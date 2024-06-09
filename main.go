@@ -9,7 +9,9 @@ import (
 	results "github.com/apenella/go-ansible/v2/pkg/execute/result/json"
 	"github.com/apenella/go-ansible/v2/pkg/execute/stdoutcallback"
 	"github.com/apenella/go-ansible/v2/pkg/playbook"
+	"github.com/gin-gonic/gin"
 	"io"
+	"net/http"
 )
 
 type ProcessInfo struct {
@@ -20,7 +22,7 @@ type ProcessInfo struct {
 }
 
 
-func main() {
+func GetInfo(c *gin.Context) {
 
 	var err error
 	var res *results.AnsiblePlaybookJSONResults
@@ -28,8 +30,16 @@ func main() {
 	buff := new(bytes.Buffer)
 
 	// 这个变量作为主机名
-	targetHost := "node"
-	targetPort := 80
+	targetHost , ok := c.GetQuery("targetHost")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "targetHost"})
+	}
+	targetPort , ok := c.GetQuery("targetPort")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "targetPort"})
+	}
+	//targetHost := "node"
+	//targetPort := 80
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		ExtraVars: map[string]interface{}{
 			"target_host": fmt.Sprintf("%s", targetHost),
@@ -94,9 +104,13 @@ func main() {
 			}
 		}
 	}
+	c.JSON(http.StatusOK, processInfo)
+}
 
-	fmt.Println("ID-->", processInfo.ID)
-	fmt.Println("Name-->", processInfo.Name)
-	fmt.Println("Job-->", processInfo.Job)
-	fmt.Println("Creator-->", processInfo.Creator)
+
+
+func main() {
+	r := gin.Default()
+	r.GET("/", GetInfo)
+	r.Run("0.0.0.0:8080")
 }
