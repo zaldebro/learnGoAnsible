@@ -16,22 +16,22 @@
       debug:
         msg: "{{ processID.stdout }}"
 
-#    - name: Get jobName
-#      shell: >
-#        dpa list | grep {{ processID.stdout }} |
-#        awk -F"[ ']+" '{print $2}'
-#      register: jobName
-#
-#    - name: Print jobName
-#      debug:
-#        msg: "{{ jobName.stdout }}"
-#
-#    - name: Change to job directory
-#      shell: >
-#        cd $(dpa status {{ jobName.stdout }} |
-#        grep "WorkingDir" | awk -F'[ ":]+' '{print $3}')
-#
-#    - name: Print user from .apollo file
-#      shell: >
-#        cat .apollo | egrep "user:" | awk '{print $2}'
-#
+   - name: Get jobName
+     shell: >
+       dpa list | grep {{ processID.stdout }} |
+       awk -F"[ ']+" '{print $2}'
+     register: jobName
+
+   - name: Print jobName
+     debug:
+       msg: "{{ jobName.stdout }}"
+
+   - name: Change to job directory
+     shell: >
+       cd $(dpa status {{ jobName.stdout }} |
+       grep "WorkingDir" | awk -F'[ ":]+' '{print $3}')
+
+   - name: Print user from .apollo file
+     shell: >
+       cat .apollo | egrep "user:" | awk '{print $2}'
+
